@@ -229,83 +229,90 @@ export function InvoiceGenerator() {
                 </CardHeader>
                 <CardContent className="p-0">
                     <div ref={invoicePreviewRef} className="border rounded-lg p-8 space-y-8 bg-card text-card-foreground font-body text-[10pt] leading-normal" style={{ width: '794px' }}>
-                        <div className="flex justify-between items-start pb-4 border-b border-border">
-                            <div>
+                         <header className="flex justify-between items-start pb-4 border-b">
+                            <div className="space-y-1">
                                 <Logo />
-                                <p className="text-muted-foreground text-xs mt-2">SYNC TECH</p>
-                                <p className="text-muted-foreground text-xs">123 Tech Avenue, Silicon Valley, CA</p>
-                                <p className="text-muted-foreground text-xs">contact@synctech.ai</p>
+                                <p className="text-xs text-muted-foreground">SYNC TECH</p>
+                                <p className="text-xs text-muted-foreground">123 Tech Avenue, Silicon Valley, CA</p>
+                                <p className="text-xs text-muted-foreground">contact@synctech.ai</p>
                             </div>
                             <div className="text-right">
-                                 <h2 className="text-3xl font-bold font-headline text-primary">INVOICE</h2>
-                                 <p className="text-muted-foreground">#INV-001</p>
-                                 <p className="text-muted-foreground mt-1">Date: {new Date().toLocaleDateString()}</p>
+                                <h2 className="text-3xl font-bold font-headline text-primary">INVOICE</h2>
+                                <p className="text-muted-foreground">#INV-001</p>
+                                <p className="text-muted-foreground mt-1">Date: {new Date().toLocaleDateString()}</p>
+                                <p className="text-muted-foreground">Due Date: {new Date(new Date().setDate(new Date().getDate() + 30)).toLocaleDateString()}</p>
                             </div>
-                        </div>
+                        </header>
                         
-                        <div className="grid grid-cols-2 gap-8">
-                            <div>
-                                <p className="font-semibold text-muted-foreground">BILL TO</p>
+                        <section className="grid grid-cols-2 gap-8 items-start">
+                             <div>
+                                <p className="font-semibold text-muted-foreground mb-1">BILL TO</p>
                                 <p className="font-semibold text-lg">{clientName || 'Client Name'}</p>
-                                <p>{clientEmail || 'client.email@example.com'}</p>
+                                <p className="text-sm text-muted-foreground">{clientEmail || 'client.email@example.com'}</p>
                             </div>
                             <div className="text-right">
                                 {isPaid ? (
-                                    <Badge variant="default" className="bg-green-600 text-white text-lg px-4 py-2">Paid</Badge>
+                                    <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white text-lg px-4 py-2 font-semibold">Paid</Badge>
                                 ) : (
-                                    <Badge variant="destructive" className="text-lg px-4 py-2">Unpaid</Badge>
+                                    <Badge variant="destructive" className="text-lg px-4 py-2 font-semibold">Unpaid</Badge>
                                 )}
                             </div>
-                        </div>
+                        </section>
 
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
+                        <section className="overflow-x-auto">
+                            <table className="w-full text-left">
                                 <thead className="bg-muted/30">
-                                    <tr className="border-b border-border">
-                                        <th className="text-left font-semibold p-3">ITEM</th>
-                                        <th className="text-center font-semibold p-3">QTY</th>
-                                        <th className="text-right font-semibold p-3">PRICE</th>
-                                        <th className="text-right font-semibold p-3">TOTAL</th>
+                                    <tr className="border-b">
+                                        <th className="p-3 font-semibold">ITEM</th>
+                                        <th className="p-3 text-center font-semibold">QTY</th>
+                                        <th className="p-3 text-right font-semibold">PRICE</th>
+                                        <th className="p-3 text-right font-semibold">TOTAL</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {lineItems.length > 0 ? lineItems.map(item => (
-                                    <tr key={item.id} className="border-b border-border">
+                                    <tr key={item.id} className="border-b">
                                         <td className="p-3 font-medium">{item.description}</td>
-                                        <td className="text-center p-3">{item.quantity}</td>
-                                        <td className="text-right p-3">{formatCurrency(item.price)}</td>
-                                        <td className="text-right p-3">{formatCurrency(item.price * item.quantity)}</td>
+                                        <td className="p-3 text-center">{item.quantity}</td>
+                                        <td className="p-3 text-right">{formatCurrency(item.price)}</td>
+                                        <td className="p-3 text-right">{formatCurrency(item.price * item.quantity)}</td>
                                     </tr>
                                     )) : (
                                     <tr>
-                                        <td colSpan={4} className="text-center text-muted-foreground p-8">No items have been added yet.</td>
+                                        <td colSpan={4} className="text-center text-muted-foreground p-12">No items have been added yet.</td>
                                     </tr>
                                     )}
                                 </tbody>
                             </table>
-                        </div>
+                        </section>
 
-                        <div className="flex justify-end pt-4">
-                            <div className="w-full max-w-sm space-y-2">
+                         <section className="flex justify-end pt-4">
+                            <div className="w-full max-w-xs space-y-2">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Subtotal</span>
-                                    <span>{formatCurrency(subtotal)}</span>
+                                    <span className="font-medium">{formatCurrency(subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Tax ({taxRate}%)</span>
-                                    <span>{formatCurrency(taxAmount)}</span>
+                                    <span className="font-medium">{formatCurrency(taxAmount)}</span>
                                 </div>
-                                <Separator className="my-2 bg-border"/>
+                                <Separator className="my-2"/>
                                 <div className="flex justify-between font-bold text-lg">
-                                    <span className="font-headline">Total Due</span>
+                                    <span className="font-headline">{isPaid ? 'Amount Paid' : 'Total Due'}</span>
                                     <span className="font-headline text-primary">{formatCurrency(total)}</span>
                                 </div>
+                                {!isPaid && (
+                                     <div className="flex justify-between font-bold text-lg text-destructive">
+                                        <span className="font-headline">Amount Due</span>
+                                        <span className="font-headline">{formatCurrency(total)}</span>
+                                     </div>
+                                )}
                             </div>
-                        </div>
-                        <div className="text-center text-xs text-muted-foreground pt-8">
+                        </section>
+                        <footer className="text-center text-xs text-muted-foreground pt-8 border-t">
                             <p>Thank you for your business!</p>
-                            <p>Please make payment within 30 days.</p>
-                        </div>
+                            <p>Please make payment within 30 days. For any inquiries, please contact us at <a href="mailto:contact@synctech.ai" className="text-primary hover:underline">contact@synctech.ai</a>.</p>
+                        </footer>
                     </div>
                 </CardContent>
                 <CardFooter className="pt-6">
