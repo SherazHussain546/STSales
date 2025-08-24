@@ -45,6 +45,7 @@ export function ClientManager() {
       const clientsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Client[];
       setClients(clientsData);
     } catch (error) {
+      console.error("Error fetching clients: ", error);
       toast({
         variant: 'destructive',
         title: 'Error Fetching Clients',
@@ -56,13 +57,34 @@ export function ClientManager() {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchClients();
-    }
+    // onAuthStateChanged listener to ensure user is available
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+        if (user) {
+            fetchClients();
+        } else {
+            setClients([]);
+            setIsLoading(false);
+        }
+    });
+    return () => unsubscribe();
   }, [user]);
 
+  const form = useForm<z.infer<typeof clientSchema>>({
+    resolver: zodResolver(clientSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      services: '',
+      workDone: '',
+      workLeft: '',
+      projectStatus: 0,
+    },
+  });
+  
   const onSubmit = async (values: z.infer<typeof clientSchema>) => {
-    if (!user) {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
         toast({ variant: 'destructive', title: 'Not Authenticated', description: 'You must be logged in to add a client.' });
         return;
     }
@@ -70,7 +92,7 @@ export function ClientManager() {
     try {
       await addDoc(collection(db, 'clients'), {
         ...values,
-        userId: user.uid,
+        userId: currentUser.uid,
         totalBilled: 0,
         totalPaid: 0,
       });
@@ -79,8 +101,9 @@ export function ClientManager() {
         description: `${values.name} has been successfully added to your client list.`,
       });
       form.reset();
-      fetchClients(); // Refresh the client list
+      await fetchClients(); // Refresh the client list
     } catch (error) {
+      console.error("Error adding client: ", error);
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -98,7 +121,7 @@ export function ClientManager() {
             title: "Client Deleted",
             description: "The client has been removed successfully.",
         });
-        fetchClients(); // Refresh list after deletion
+        await fetchClients(); // Refresh list after deletion
     } catch (error) {
         toast({
             variant: "destructive",
@@ -107,19 +130,6 @@ export function ClientManager() {
         });
     }
   };
-
-  const form = useForm<z.infer<typeof clientSchema>>({
-    resolver: zodResolver(clientSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      phone: '',
-      services: '',
-      workDone: '',
-      workLeft: '',
-      projectStatus: 0,
-    },
-  });
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
