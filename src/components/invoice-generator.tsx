@@ -13,6 +13,8 @@ import { Logo } from './logo';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useToast } from '@/components/ui/use-toast';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 
 
 const SYNC_SERVICES = [
@@ -27,6 +29,7 @@ export function InvoiceGenerator() {
     const [clientEmail, setClientEmail] = useState('');
     const [lineItems, setLineItems] = useState<LineItem[]>([]);
     const [taxRate, setTaxRate] = useState(0);
+    const [isPaid, setIsPaid] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const { toast } = useToast();
     const invoicePreviewRef = useRef<HTMLDivElement>(null);
@@ -77,19 +80,40 @@ export function InvoiceGenerator() {
 
         try {
             const canvas = await html2canvas(invoicePreviewRef.current, {
-                 scale: 2, // Higher scale for better quality
+                 scale: 2,
                  useCORS: true,
-                 backgroundColor: null,
+                 backgroundColor: '#1c1f26', // Match card background for consistency
+                 windowWidth: 794, // A4 width in pixels at 96 DPI
             });
             const imgData = canvas.toDataURL('image/png');
             
             const pdf = new jsPDF({
                 orientation: 'p',
-                unit: 'px',
-                format: [canvas.width, canvas.height]
+                unit: 'pt',
+                format: 'a4'
             });
 
-            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const canvasAspectRatio = canvasWidth / canvasHeight;
+            const pdfAspectRatio = pdfWidth / pdfHeight;
+            
+            let finalCanvasWidth, finalCanvasHeight;
+
+            if (canvasAspectRatio > pdfAspectRatio) {
+                finalCanvasWidth = pdfWidth;
+                finalCanvasHeight = pdfWidth / canvasAspectRatio;
+            } else {
+                finalCanvasHeight = pdfHeight;
+                finalCanvasWidth = pdfHeight * canvasAspectRatio;
+            }
+
+            const x = (pdfWidth - finalCanvasWidth) / 2;
+            const y = 0; // Align to top
+
+            pdf.addImage(imgData, 'PNG', x, y, finalCanvasWidth, finalCanvasHeight);
             pdf.save(`invoice-${clientName.replace(/\s/g, '-')}-001.pdf`);
 
         } catch (error) {
@@ -169,7 +193,7 @@ export function InvoiceGenerator() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline">Totals</CardTitle>
+                    <CardTitle className="font-headline">Totals & Status</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                      <div className="space-y-2">
@@ -191,6 +215,11 @@ export function InvoiceGenerator() {
                             <span>{formatCurrency(total)}</span>
                         </div>
                     </div>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="invoice-paid" className="font-medium">Mark as Paid</Label>
+                         <Switch id="invoice-paid" checked={isPaid} onCheckedChange={setIsPaid} />
+                    </div>
                 </CardContent>
             </Card>
 
@@ -199,54 +228,65 @@ export function InvoiceGenerator() {
                     <CardTitle className="font-headline">Invoice Preview</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div ref={invoicePreviewRef} className="border rounded-lg p-6 space-y-8 bg-card">
-                        <div className="flex justify-between items-start">
+                    <div ref={invoicePreviewRef} className="border rounded-lg p-8 space-y-8 bg-card text-card-foreground font-body text-[10pt] leading-normal" style={{ width: '794px' }}>
+                        <div className="flex justify-between items-start pb-4 border-b border-border">
                             <div>
                                 <Logo />
-                                <p className="text-muted-foreground text-sm mt-2">SYNC TECH</p>
-                                <p className="text-muted-foreground text-sm">123 Tech Avenue, Silicon Valley, CA</p>
+                                <p className="text-muted-foreground text-xs mt-2">SYNC TECH</p>
+                                <p className="text-muted-foreground text-xs">123 Tech Avenue, Silicon Valley, CA</p>
+                                <p className="text-muted-foreground text-xs">contact@synctech.ai</p>
                             </div>
                             <div className="text-right">
-                                 <h2 className="text-2xl font-bold font-headline text-primary">INVOICE</h2>
+                                 <h2 className="text-3xl font-bold font-headline text-primary">INVOICE</h2>
                                  <p className="text-muted-foreground">#INV-001</p>
+                                 <p className="text-muted-foreground mt-1">Date: {new Date().toLocaleDateString()}</p>
                             </div>
                         </div>
                         
-                        <div>
-                            <p className="text-muted-foreground">Bill To:</p>
-                            <p className="font-semibold">{clientName || 'Client Name'}</p>
-                            <p>{clientEmail || 'client.email@example.com'}</p>
+                        <div className="grid grid-cols-2 gap-8">
+                            <div>
+                                <p className="font-semibold text-muted-foreground">BILL TO</p>
+                                <p className="font-semibold text-lg">{clientName || 'Client Name'}</p>
+                                <p>{clientEmail || 'client.email@example.com'}</p>
+                            </div>
+                            <div className="text-right">
+                                {isPaid ? (
+                                    <Badge variant="default" className="bg-green-600 text-white text-lg px-4 py-2">Paid</Badge>
+                                ) : (
+                                    <Badge variant="destructive" className="text-lg px-4 py-2">Unpaid</Badge>
+                                )}
+                            </div>
                         </div>
 
                         <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="border-b">
-                                        <th className="text-left font-semibold p-2">Item</th>
-                                        <th className="text-center font-semibold p-2">Qty</th>
-                                        <th className="text-right font-semibold p-2">Price</th>
-                                        <th className="text-right font-semibold p-2">Total</th>
+                            <table className="w-full">
+                                <thead className="bg-muted/30">
+                                    <tr className="border-b border-border">
+                                        <th className="text-left font-semibold p-3">ITEM</th>
+                                        <th className="text-center font-semibold p-3">QTY</th>
+                                        <th className="text-right font-semibold p-3">PRICE</th>
+                                        <th className="text-right font-semibold p-3">TOTAL</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {lineItems.length > 0 ? lineItems.map(item => (
-                                    <tr key={item.id} className="border-b">
-                                        <td className="p-2">{item.description}</td>
-                                        <td className="text-center p-2">{item.quantity}</td>
-                                        <td className="text-right p-2">{formatCurrency(item.price)}</td>
-                                        <td className="text-right p-2">{formatCurrency(item.price * item.quantity)}</td>
+                                    <tr key={item.id} className="border-b border-border">
+                                        <td className="p-3 font-medium">{item.description}</td>
+                                        <td className="text-center p-3">{item.quantity}</td>
+                                        <td className="text-right p-3">{formatCurrency(item.price)}</td>
+                                        <td className="text-right p-3">{formatCurrency(item.price * item.quantity)}</td>
                                     </tr>
                                     )) : (
                                     <tr>
-                                        <td colSpan={4} className="text-center text-muted-foreground p-4">No items yet.</td>
+                                        <td colSpan={4} className="text-center text-muted-foreground p-8">No items have been added yet.</td>
                                     </tr>
                                     )}
                                 </tbody>
                             </table>
                         </div>
 
-                        <div className="flex justify-end">
-                            <div className="w-full max-w-xs space-y-2">
+                        <div className="flex justify-end pt-4">
+                            <div className="w-full max-w-sm space-y-2">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Subtotal</span>
                                     <span>{formatCurrency(subtotal)}</span>
@@ -255,12 +295,16 @@ export function InvoiceGenerator() {
                                     <span className="text-muted-foreground">Tax ({taxRate}%)</span>
                                     <span>{formatCurrency(taxAmount)}</span>
                                 </div>
-                                <Separator />
+                                <Separator className="my-2 bg-border"/>
                                 <div className="flex justify-between font-bold text-lg">
-                                    <span className="font-headline">Total</span>
+                                    <span className="font-headline">Total Due</span>
                                     <span className="font-headline text-primary">{formatCurrency(total)}</span>
                                 </div>
                             </div>
+                        </div>
+                        <div className="text-center text-xs text-muted-foreground pt-8">
+                            <p>Thank you for your business!</p>
+                            <p>Please make payment within 30 days.</p>
                         </div>
                     </div>
                 </CardContent>
