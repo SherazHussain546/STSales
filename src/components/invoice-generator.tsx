@@ -1,15 +1,19 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PlusCircle, XCircle, Download } from 'lucide-react';
+import { PlusCircle, XCircle, Download, Loader2 } from 'lucide-react';
 import type { LineItem } from '@/lib/types';
 import { Logo } from './logo';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { useToast } from '@/hooks/use-toast';
+
 
 const SYNC_SERVICES = [
     { name: 'AI Chatbot Integration', rate: 5000 },
@@ -23,6 +27,10 @@ export function InvoiceGenerator() {
     const [clientEmail, setClientEmail] = useState('');
     const [lineItems, setLineItems] = useState<LineItem[]>([]);
     const [taxRate, setTaxRate] = useState(0);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const { toast } = useToast();
+    const invoicePreviewRef = useRef<HTMLDivElement>(null);
+
 
     const addLineItem = () => {
         setLineItems([...lineItems, { id: crypto.randomUUID(), description: '', quantity: 1, price: 0 }]);
@@ -53,6 +61,48 @@ export function InvoiceGenerator() {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
     }
+    
+    const handleGeneratePdf = async () => {
+        if (!clientName || !clientEmail) {
+            toast({
+                variant: 'destructive',
+                title: 'Missing Information',
+                description: 'Please fill out the client name and email before generating the PDF.',
+            });
+            return;
+        }
+
+        if (!invoicePreviewRef.current) return;
+        setIsGenerating(true);
+
+        try {
+            const canvas = await html2canvas(invoicePreviewRef.current, {
+                 scale: 2, // Higher scale for better quality
+                 useCORS: true,
+                 backgroundColor: null,
+            });
+            const imgData = canvas.toDataURL('image/png');
+            
+            const pdf = new jsPDF({
+                orientation: 'p',
+                unit: 'px',
+                format: [canvas.width, canvas.height]
+            });
+
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save(`invoice-${clientName.replace(/\s/g, '-')}-001.pdf`);
+
+        } catch (error) {
+             toast({
+                variant: 'destructive',
+                title: 'PDF Generation Failed',
+                description: 'An error occurred while generating the PDF. Please try again.',
+            });
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
 
     return (
         <div className="space-y-6">
@@ -148,74 +198,85 @@ export function InvoiceGenerator() {
                 <CardHeader>
                     <CardTitle className="font-headline">Invoice Preview</CardTitle>
                 </CardHeader>
-                <CardContent className="border rounded-lg p-6 space-y-8 bg-background">
-                    <div className="flex justify-between items-start">
+                <CardContent className="p-0">
+                    <div ref={invoicePreviewRef} className="border rounded-lg p-6 space-y-8 bg-card">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <Logo />
+                                <p className="text-muted-foreground text-sm mt-2">SYNC TECH</p>
+                                <p className="text-muted-foreground text-sm">123 Tech Avenue, Silicon Valley, CA</p>
+                            </div>
+                            <div className="text-right">
+                                 <h2 className="text-2xl font-bold font-headline text-primary">INVOICE</h2>
+                                 <p className="text-muted-foreground">#INV-001</p>
+                            </div>
+                        </div>
+                        
                         <div>
-                            <Logo />
-                            <p className="text-muted-foreground text-sm mt-2">SYNC TECH</p>
-                            <p className="text-muted-foreground text-sm">123 Tech Avenue, Silicon Valley, CA</p>
+                            <p className="text-muted-foreground">Bill To:</p>
+                            <p className="font-semibold">{clientName || 'Client Name'}</p>
+                            <p>{clientEmail || 'client.email@example.com'}</p>
                         </div>
-                        <div className="text-right">
-                             <h2 className="text-2xl font-bold font-headline text-primary">INVOICE</h2>
-                             <p className="text-muted-foreground">#INV-001</p>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b">
+                                        <th className="text-left font-semibold p-2">Item</th>
+                                        <th className="text-center font-semibold p-2">Qty</th>
+                                        <th className="text-right font-semibold p-2">Price</th>
+                                        <th className="text-right font-semibold p-2">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {lineItems.length > 0 ? lineItems.map(item => (
+                                    <tr key={item.id} className="border-b">
+                                        <td className="p-2">{item.description}</td>
+                                        <td className="text-center p-2">{item.quantity}</td>
+                                        <td className="text-right p-2">{formatCurrency(item.price)}</td>
+                                        <td className="text-right p-2">{formatCurrency(item.price * item.quantity)}</td>
+                                    </tr>
+                                    )) : (
+                                    <tr>
+                                        <td colSpan={4} className="text-center text-muted-foreground p-4">No items yet.</td>
+                                    </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
-                    
-                    <div>
-                        <p className="text-muted-foreground">Bill To:</p>
-                        <p className="font-semibold">{clientName || 'Client Name'}</p>
-                        <p>{clientEmail || 'client.email@example.com'}</p>
-                    </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b">
-                                    <th className="text-left font-semibold p-2">Item</th>
-                                    <th className="text-center font-semibold p-2">Qty</th>
-                                    <th className="text-right font-semibold p-2">Price</th>
-                                    <th className="text-right font-semibold p-2">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {lineItems.length > 0 ? lineItems.map(item => (
-                                <tr key={item.id} className="border-b">
-                                    <td className="p-2">{item.description}</td>
-                                    <td className="text-center p-2">{item.quantity}</td>
-                                    <td className="text-right p-2">{formatCurrency(item.price)}</td>
-                                    <td className="text-right p-2">{formatCurrency(item.price * item.quantity)}</td>
-                                </tr>
-                                )) : (
-                                <tr>
-                                    <td colSpan={4} className="text-center text-muted-foreground p-4">No items yet.</td>
-                                </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div className="flex justify-end">
-                        <div className="w-full max-w-xs space-y-2">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Subtotal</span>
-                                <span>{formatCurrency(subtotal)}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Tax ({taxRate}%)</span>
-                                <span>{formatCurrency(taxAmount)}</span>
-                            </div>
-                            <Separator />
-                            <div className="flex justify-between font-bold text-lg">
-                                <span className="font-headline">Total</span>
-                                <span className="font-headline text-primary">{formatCurrency(total)}</span>
+                        <div className="flex justify-end">
+                            <div className="w-full max-w-xs space-y-2">
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Subtotal</span>
+                                    <span>{formatCurrency(subtotal)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Tax ({taxRate}%)</span>
+                                    <span>{formatCurrency(taxAmount)}</span>
+                                </div>
+                                <Separator />
+                                <div className="flex justify-between font-bold text-lg">
+                                    <span className="font-headline">Total</span>
+                                    <span className="font-headline text-primary">{formatCurrency(total)}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter>
-                     <Button className="w-full" size="lg">
-                        <Download className="mr-2 h-4 w-4" />
-                        Generate PDF
+                <CardFooter className="pt-6">
+                     <Button className="w-full" size="lg" onClick={handleGeneratePdf} disabled={isGenerating}>
+                        {isGenerating ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Generating...
+                            </>
+                        ) : (
+                            <>
+                                <Download className="mr-2 h-4 w-4" />
+                                Generate PDF
+                            </>
+                        )}
                     </Button>
                 </CardFooter>
             </Card>
