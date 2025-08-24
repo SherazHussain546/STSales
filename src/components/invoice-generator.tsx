@@ -228,91 +228,96 @@ export function InvoiceGenerator() {
                     <CardTitle className="font-headline">Invoice Preview</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div ref={invoicePreviewRef} className="border rounded-lg p-8 space-y-8 bg-card text-card-foreground font-body text-[10pt] leading-normal" style={{ width: '794px' }}>
-                         <header className="flex justify-between items-start pb-4 border-b">
-                            <div className="space-y-1">
-                                <Logo />
-                                <p className="text-xs text-muted-foreground">SYNC TECH</p>
-                                <p className="text-xs text-muted-foreground">123 Tech Avenue, Silicon Valley, CA</p>
-                                <p className="text-xs text-muted-foreground">contact@synctech.ai</p>
-                            </div>
-                            <div className="text-right">
-                                <h2 className="text-3xl font-bold font-headline text-primary">INVOICE</h2>
-                                <p className="text-muted-foreground">#INV-001</p>
-                                <p className="text-muted-foreground mt-1">Date: {new Date().toLocaleDateString()}</p>
-                                <p className="text-muted-foreground">Due Date: {new Date(new Date().setDate(new Date().getDate() + 30)).toLocaleDateString()}</p>
-                            </div>
-                        </header>
-                        
-                        <section className="grid grid-cols-2 gap-8 items-start">
-                             <div>
-                                <p className="font-semibold text-muted-foreground mb-1">BILL TO</p>
-                                <p className="font-semibold text-lg">{clientName || 'Client Name'}</p>
-                                <p className="text-sm text-muted-foreground">{clientEmail || 'client.email@example.com'}</p>
-                            </div>
-                            <div className="text-right">
-                                {isPaid ? (
-                                    <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white text-lg px-4 py-2 font-semibold">Paid</Badge>
-                                ) : (
-                                    <Badge variant="destructive" className="text-lg px-4 py-2 font-semibold">Unpaid</Badge>
-                                )}
-                            </div>
-                        </section>
-
-                        <section className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead className="bg-muted/30">
-                                    <tr className="border-b">
-                                        <th className="p-3 font-semibold">ITEM</th>
-                                        <th className="p-3 text-center font-semibold">QTY</th>
-                                        <th className="p-3 text-right font-semibold">PRICE</th>
-                                        <th className="p-3 text-right font-semibold">TOTAL</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {lineItems.length > 0 ? lineItems.map(item => (
-                                    <tr key={item.id} className="border-b">
-                                        <td className="p-3 font-medium">{item.description}</td>
-                                        <td className="p-3 text-center">{item.quantity}</td>
-                                        <td className="p-3 text-right">{formatCurrency(item.price)}</td>
-                                        <td className="p-3 text-right">{formatCurrency(item.price * item.quantity)}</td>
-                                    </tr>
-                                    )) : (
-                                    <tr>
-                                        <td colSpan={4} className="text-center text-muted-foreground p-12">No items have been added yet.</td>
-                                    </tr>
+                    {/* The container for the on-screen preview. It will be responsive. */}
+                    <div className="w-full overflow-x-auto">
+                        {/* The actual invoice content, sized for A4 paper. This will be used for both the preview and the PDF generation. */}
+                        {/* `min-w-[794px]` ensures it doesn't get squished on smaller screens, allowing horizontal scroll. */}
+                        <div ref={invoicePreviewRef} className="border rounded-lg p-8 space-y-8 bg-card text-card-foreground font-body text-[10pt] leading-normal min-w-[794px]" style={{ width: '794px' }}>
+                             <header className="flex justify-between items-start pb-4 border-b">
+                                <div className="space-y-1">
+                                    <Logo />
+                                    <p className="text-xs text-muted-foreground">SYNC TECH</p>
+                                    <p className="text-xs text-muted-foreground">123 Tech Avenue, Silicon Valley, CA</p>
+                                    <p className="text-xs text-muted-foreground">contact@synctech.ai</p>
+                                </div>
+                                <div className="text-right">
+                                    <h2 className="text-3xl font-bold font-headline text-primary">INVOICE</h2>
+                                    <p className="text-muted-foreground">#INV-001</p>
+                                    <p className="text-muted-foreground mt-1">Date: {new Date().toLocaleDateString()}</p>
+                                    <p className="text-muted-foreground">Due Date: {new Date(new Date().setDate(new Date().getDate() + 30)).toLocaleDateString()}</p>
+                                </div>
+                            </header>
+                            
+                            <section className="grid grid-cols-2 gap-8 items-start">
+                                 <div>
+                                    <p className="font-semibold text-muted-foreground mb-1">BILL TO</p>
+                                    <p className="font-semibold text-lg">{clientName || 'Client Name'}</p>
+                                    <p className="text-sm text-muted-foreground">{clientEmail || 'client.email@example.com'}</p>
+                                </div>
+                                <div className="text-right">
+                                    {isPaid ? (
+                                        <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white text-lg px-4 py-2 font-semibold">Paid</Badge>
+                                    ) : (
+                                        <Badge variant="destructive" className="text-lg px-4 py-2 font-semibold">Unpaid</Badge>
                                     )}
-                                </tbody>
-                            </table>
-                        </section>
+                                </div>
+                            </section>
 
-                         <section className="flex justify-end pt-4">
-                            <div className="w-full max-w-xs space-y-2">
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Subtotal</span>
-                                    <span className="font-medium">{formatCurrency(subtotal)}</span>
+                            <section className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead className="bg-muted/30">
+                                        <tr className="border-b">
+                                            <th className="p-3 font-semibold">ITEM</th>
+                                            <th className="p-3 text-center font-semibold">QTY</th>
+                                            <th className="p-3 text-right font-semibold">PRICE</th>
+                                            <th className="p-3 text-right font-semibold">TOTAL</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {lineItems.length > 0 ? lineItems.map(item => (
+                                        <tr key={item.id} className="border-b">
+                                            <td className="p-3 font-medium">{item.description}</td>
+                                            <td className="p-3 text-center">{item.quantity}</td>
+                                            <td className="p-3 text-right">{formatCurrency(item.price)}</td>
+                                            <td className="p-3 text-right">{formatCurrency(item.price * item.quantity)}</td>
+                                        </tr>
+                                        )) : (
+                                        <tr>
+                                            <td colSpan={4} className="text-center text-muted-foreground p-12">No items have been added yet.</td>
+                                        </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </section>
+
+                             <section className="flex justify-end pt-4">
+                                <div className="w-full max-w-xs space-y-2">
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Subtotal</span>
+                                        <span className="font-medium">{formatCurrency(subtotal)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Tax ({taxRate}%)</span>
+                                        <span className="font-medium">{formatCurrency(taxAmount)}</span>
+                                    </div>
+                                    <Separator className="my-2"/>
+                                    <div className="flex justify-between font-bold text-lg">
+                                        <span className="font-headline">{isPaid ? 'Amount Paid' : 'Total Due'}</span>
+                                        <span className="font-headline text-primary">{formatCurrency(total)}</span>
+                                    </div>
+                                    {!isPaid && (
+                                         <div className="flex justify-between font-bold text-lg text-destructive">
+                                            <span className="font-headline">Amount Due</span>
+                                            <span className="font-headline">{formatCurrency(total)}</span>
+                                         </div>
+                                    )}
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Tax ({taxRate}%)</span>
-                                    <span className="font-medium">{formatCurrency(taxAmount)}</span>
-                                </div>
-                                <Separator className="my-2"/>
-                                <div className="flex justify-between font-bold text-lg">
-                                    <span className="font-headline">{isPaid ? 'Amount Paid' : 'Total Due'}</span>
-                                    <span className="font-headline text-primary">{formatCurrency(total)}</span>
-                                </div>
-                                {!isPaid && (
-                                     <div className="flex justify-between font-bold text-lg text-destructive">
-                                        <span className="font-headline">Amount Due</span>
-                                        <span className="font-headline">{formatCurrency(total)}</span>
-                                     </div>
-                                )}
-                            </div>
-                        </section>
-                        <footer className="text-center text-xs text-muted-foreground pt-8 border-t">
-                            <p>Thank you for your business!</p>
-                            <p>Please make payment within 30 days. For any inquiries, please contact us at <a href="mailto:contact@synctech.ai" className="text-primary hover:underline">contact@synctech.ai</a>.</p>
-                        </footer>
+                            </section>
+                            <footer className="text-center text-xs text-muted-foreground pt-8 border-t">
+                                <p>Thank you for your business!</p>
+                                <p>Please make payment within 30 days. For any inquiries, please contact us at <a href="mailto:contact@synctech.ai" className="text-primary hover:underline">contact@synctech.ai</a>.</p>
+                            </footer>
+                        </div>
                     </div>
                 </CardContent>
                 <CardFooter className="pt-6">
