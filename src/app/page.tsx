@@ -10,6 +10,7 @@ import { OutreachGenerator } from '@/components/outreach-generator';
 import { InvoiceGenerator } from '@/components/invoice-generator';
 import { ClientManager } from '@/components/client-manager';
 import { SocialsViewer } from '@/components/socials-viewer';
+import { BlogGenerator } from '@/components/blog-generator';
 import type { Tab } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -53,6 +54,8 @@ export default function Home() {
         return <ClientManager />;
       case 'socials':
         return <SocialsViewer />;
+      case 'blog':
+        return <BlogGenerator />;
       default:
         return <LeadFinder leads={leads} setLeads={setLeads} onSelectLead={handleSelectLead} />;
     }

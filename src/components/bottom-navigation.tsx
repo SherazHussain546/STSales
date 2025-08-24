@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Mail, FileText, Users, Share2 } from 'lucide-react';
+import { Search, Mail, FileText, Users, Share2, Feather } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Tab } from '@/lib/types';
@@ -16,6 +16,7 @@ const navItems = [
   { id: 'outreach', label: 'Outreach', icon: Mail },
   { id: 'invoice', label: 'Invoice', icon: FileText },
   { id: 'clients', label: 'Clients', icon: Users },
+  { id: 'blog', label: 'Blog', icon: Feather },
   { id: 'socials', label: 'Socials', icon: Share2 },
 ] as const;
 
@@ -28,14 +29,14 @@ export function BottomNavigation({ activeTab, setActiveTab }: BottomNavigationPr
             key={item.id}
             variant="ghost"
             className={cn(
-              'flex flex-col items-center h-auto px-4 py-2 text-xs font-normal gap-1',
+              'flex flex-col items-center h-auto px-2 py-2 text-xs font-normal gap-1 w-[calc(100%/6)]',
               activeTab === item.id ? 'text-primary' : 'text-muted-foreground'
             )}
             onClick={() => setActiveTab(item.id)}
             aria-current={activeTab === item.id ? 'page' : undefined}
           >
             <item.icon className="h-5 w-5" />
-            <span>{item.label}</span>
+            <span className="text-center leading-tight">{item.label}</span>
           </Button>
         ))}
       </div>
