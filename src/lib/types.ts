@@ -1,4 +1,4 @@
-export type Tab = 'leads' | 'outreach' | 'invoice' | 'clients';
+export type Tab = 'leads' | 'outreach' | 'invoice' | 'clients' | 'socials';
 
 export type LineItem = {
   id: string;
