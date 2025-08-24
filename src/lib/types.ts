@@ -12,8 +12,11 @@ export type Client = {
     userId: string;
     name: string;
     email: string;
-    services: string[];
+    phone: string;
+    services: string;
+    workDone: string;
+    workLeft: string;
+    projectStatus: number; // Percentage, 0-100
     totalBilled: number;
     totalPaid: number;
-    projectStatus: number; // Percentage, 0-100
 };
