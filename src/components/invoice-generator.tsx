@@ -12,7 +12,7 @@ import type { LineItem } from '@/lib/types';
 import { Logo } from './logo';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 
 const SYNC_SERVICES = [

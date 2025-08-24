@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2, Copy, Inbox } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import type { Lead } from '@/ai/flows/lead-search';
 import { generateOutreachContent } from '@/ai/flows/outreach-generation';
 import type { OutreachContentOutput } from '@/ai/flows/outreach-generation';
