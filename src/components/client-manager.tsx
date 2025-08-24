@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import { PlusCircle, Loader2, Users, AlertCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -28,14 +29,6 @@ export function ClientManager() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const user = auth.currentUser;
-
-  const form = useForm<z.infer<typeof clientSchema>>({
-    resolver: zodResolver(clientSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-    },
-  });
 
   const fetchClients = async () => {
     if (!user) return;
@@ -93,6 +86,14 @@ export function ClientManager() {
       setIsSubmitting(false);
     }
   };
+
+  const form = useForm<z.infer<typeof clientSchema>>({
+    resolver: zodResolver(clientSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+    },
+  });
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
