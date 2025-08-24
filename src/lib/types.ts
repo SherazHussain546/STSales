@@ -9,6 +9,7 @@ export type LineItem = {
 
 export type Client = {
     id: string;
+    userId: string;
     name: string;
     email: string;
     services: string[];

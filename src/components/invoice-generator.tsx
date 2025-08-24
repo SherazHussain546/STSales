@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -8,14 +8,15 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, XCircle, Download, Loader2 } from 'lucide-react';
-import type { LineItem } from '@/lib/types';
+import type { LineItem, Client } from '@/lib/types';
 import { Logo } from './logo';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useToast } from '@/components/ui/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase/client';
 
 const SYNC_SERVICES = [
     { name: 'AI Chatbot Integration', rate: 5000 },
@@ -25,15 +26,38 @@ const SYNC_SERVICES = [
 ];
 
 export function InvoiceGenerator() {
-    const [clientName, setClientName] = useState('');
-    const [clientEmail, setClientEmail] = useState('');
+    const [clients, setClients] = useState<Client[]>([]);
+    const [selectedClientId, setSelectedClientId] = useState<string>('');
     const [lineItems, setLineItems] = useState<LineItem[]>([]);
     const [taxRate, setTaxRate] = useState(0);
     const [isPaid, setIsPaid] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const { toast } = useToast();
     const invoicePreviewRef = useRef<HTMLDivElement>(null);
+    const user = auth.currentUser;
 
+    useEffect(() => {
+        const fetchClients = async () => {
+            if (!user) return;
+            try {
+                const q = query(collection(db, 'clients'), where('userId', '==', user.uid));
+                const querySnapshot = await getDocs(q);
+                const clientsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Client[];
+                setClients(clientsData);
+            } catch (error) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Error Fetching Clients',
+                    description: 'Could not load client data from the database.',
+                });
+            }
+        };
+        fetchClients();
+    }, [user, toast]);
+
+    const selectedClient = useMemo(() => {
+        return clients.find(c => c.id === selectedClientId) || null;
+    }, [clients, selectedClientId]);
 
     const addLineItem = () => {
         setLineItems([...lineItems, { id: crypto.randomUUID(), description: '', quantity: 1, price: 0 }]);
@@ -66,11 +90,11 @@ export function InvoiceGenerator() {
     }
     
     const handleGeneratePdf = async () => {
-        if (!clientName || !clientEmail) {
+        if (!selectedClient) {
             toast({
                 variant: 'destructive',
                 title: 'Missing Information',
-                description: 'Please fill out the client name and email before generating the PDF.',
+                description: 'Please select a client before generating the PDF.',
             });
             return;
         }
@@ -114,7 +138,7 @@ export function InvoiceGenerator() {
             const y = 0; // Align to top
 
             pdf.addImage(imgData, 'PNG', x, y, finalCanvasWidth, finalCanvasHeight);
-            pdf.save(`invoice-${clientName.replace(/\s/g, '-')}-001.pdf`);
+            pdf.save(`invoice-${selectedClient.name.replace(/\s/g, '-')}-001.pdf`);
 
         } catch (error) {
              toast({
@@ -136,12 +160,17 @@ export function InvoiceGenerator() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="client-name">Client Name</Label>
-                        <Input id="client-name" placeholder="Acme Inc." value={clientName} onChange={e => setClientName(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="client-email">Client Email</Label>
-                        <Input id="client-email" type="email" placeholder="contact@acme.com" value={clientEmail} onChange={e => setClientEmail(e.target.value)} />
+                        <Label htmlFor="client-select">Select Client</Label>
+                        <Select onValueChange={setSelectedClientId} value={selectedClientId}>
+                            <SelectTrigger id="client-select">
+                                <SelectValue placeholder="Select a client..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {clients.length > 0 ? clients.map(client => (
+                                    <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                                )) : <SelectItem value="no-clients" disabled>No clients found</SelectItem>}
+                            </SelectContent>
+                        </Select>
                     </div>
                 </CardContent>
             </Card>
@@ -228,10 +257,7 @@ export function InvoiceGenerator() {
                     <CardTitle className="font-headline">Invoice Preview</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                    {/* The container for the on-screen preview. It will be responsive. */}
                     <div className="w-full overflow-x-auto">
-                        {/* The actual invoice content, sized for A4 paper. This will be used for both the preview and the PDF generation. */}
-                        {/* `min-w-[794px]` ensures it doesn't get squished on smaller screens, allowing horizontal scroll. */}
                         <div ref={invoicePreviewRef} className="border rounded-lg p-8 space-y-8 bg-card text-card-foreground font-body text-[10pt] leading-normal min-w-[794px]" style={{ width: '794px' }}>
                              <header className="flex justify-between items-start pb-4 border-b">
                                 <div className="space-y-1">
@@ -251,8 +277,8 @@ export function InvoiceGenerator() {
                             <section className="grid grid-cols-2 gap-8 items-start">
                                  <div>
                                     <p className="font-semibold text-muted-foreground mb-1">BILL TO</p>
-                                    <p className="font-semibold text-lg">{clientName || 'Client Name'}</p>
-                                    <p className="text-sm text-muted-foreground">{clientEmail || 'client.email@example.com'}</p>
+                                    <p className="font-semibold text-lg">{selectedClient?.name || 'Client Name'}</p>
+                                    <p className="text-sm text-muted-foreground">{selectedClient?.email || 'client.email@example.com'}</p>
                                 </div>
                                 <div className="text-right">
                                     {isPaid ? (
