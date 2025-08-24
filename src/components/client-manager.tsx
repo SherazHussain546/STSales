@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase/client';
+import { db } from '@/lib/firebase/client';
 import type { Client } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -85,9 +85,6 @@ export function ClientManager() {
         userId: user.uid,
         totalBilled: 0,
         totalPaid: 0,
-        projectStatus: 0,
-        workDone: '',
-        workLeft: '',
       });
       toast({
         title: 'Client Added',
