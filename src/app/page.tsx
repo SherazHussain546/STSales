@@ -8,6 +8,7 @@ import { BottomNavigation } from '@/components/bottom-navigation';
 import { LeadFinder } from '@/components/lead-finder';
 import { OutreachGenerator } from '@/components/outreach-generator';
 import { InvoiceGenerator } from '@/components/invoice-generator';
+import { ClientManager } from '@/components/client-manager';
 import type { Tab } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -47,6 +48,8 @@ export default function Home() {
         return <OutreachGenerator lead={selectedLead} onBack={handleBackToLeads} />;
       case 'invoice':
         return <InvoiceGenerator />;
+      case 'clients':
+        return <ClientManager />;
       default:
         return <LeadFinder leads={leads} setLeads={setLeads} onSelectLead={handleSelectLead} />;
     }

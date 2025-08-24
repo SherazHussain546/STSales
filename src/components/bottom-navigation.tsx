@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Mail, FileText } from 'lucide-react';
+import { Search, Mail, FileText, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Tab } from '@/lib/types';
@@ -15,6 +15,7 @@ const navItems = [
   { id: 'leads', label: 'Lead Finder', icon: Search },
   { id: 'outreach', label: 'Outreach', icon: Mail },
   { id: 'invoice', label: 'Invoice', icon: FileText },
+  { id: 'clients', label: 'Clients', icon: Users },
 ] as const;
 
 export function BottomNavigation({ activeTab, setActiveTab }: BottomNavigationProps) {
