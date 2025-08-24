@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { PlusCircle, Loader2, Users, Trash2, Edit, Phone, Briefcase, ListTodo, ListChecks } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 
 const clientSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -34,10 +35,26 @@ export function ClientManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const user = auth.currentUser;
+  const { user } = useAuth();
+
+  const form = useForm<z.infer<typeof clientSchema>>({
+    resolver: zodResolver(clientSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      services: '',
+      workDone: '',
+      workLeft: '',
+      projectStatus: 0,
+    },
+  });
 
   const fetchClients = async () => {
-    if (!user) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     try {
       const q = query(collection(db, 'clients'), where('userId', '==', user.uid));
@@ -57,34 +74,14 @@ export function ClientManager() {
   };
 
   useEffect(() => {
-    // onAuthStateChanged listener to ensure user is available
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-        if (user) {
-            fetchClients();
-        } else {
-            setClients([]);
-            setIsLoading(false);
-        }
-    });
-    return () => unsubscribe();
+    if (user) {
+      fetchClients();
+    }
   }, [user]);
 
-  const form = useForm<z.infer<typeof clientSchema>>({
-    resolver: zodResolver(clientSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      phone: '',
-      services: '',
-      workDone: '',
-      workLeft: '',
-      projectStatus: 0,
-    },
-  });
   
   const onSubmit = async (values: z.infer<typeof clientSchema>) => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
+    if (!user) {
         toast({ variant: 'destructive', title: 'Not Authenticated', description: 'You must be logged in to add a client.' });
         return;
     }
@@ -92,7 +89,7 @@ export function ClientManager() {
     try {
       await addDoc(collection(db, 'clients'), {
         ...values,
-        userId: currentUser.uid,
+        userId: user.uid,
         totalBilled: 0,
         totalPaid: 0,
       });
