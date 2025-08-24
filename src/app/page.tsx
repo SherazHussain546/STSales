@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Lead } from '@/ai/flows/lead-search';
 import { Header } from '@/components/header';
 import { BottomNavigation } from '@/components/bottom-navigation';
@@ -8,11 +9,25 @@ import { LeadFinder } from '@/components/lead-finder';
 import { OutreachGenerator } from '@/components/outreach-generator';
 import { InvoiceGenerator } from '@/components/invoice-generator';
 import type { Tab } from '@/lib/types';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('leads');
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+
+  if (loading || !user) {
+    return null; 
+  }
 
   const handleSelectLead = (lead: Lead) => {
     setSelectedLead(lead);

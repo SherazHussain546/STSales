@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
+import { AuthProvider } from '@/components/auth-provider';
 
 export const metadata: Metadata = {
   title: 'SYNC Sales Hub',
@@ -22,12 +23,14 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased bg-background text-foreground">
-        <div className="relative flex min-h-screen w-full flex-col items-center">
-            <div className="w-full max-w-md">
-                {children}
-            </div>
-        </div>
-        <Toaster />
+        <AuthProvider>
+          <div className="relative flex min-h-screen w-full flex-col items-center">
+              <div className="w-full max-w-md">
+                  {children}
+              </div>
+          </div>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
