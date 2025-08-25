@@ -3,7 +3,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Github, Linkedin, Facebook, Instagram, Share2, Rss } from 'lucide-react';
+import { Github, Linkedin, Facebook, Instagram, Share2, Rss, Briefcase } from 'lucide-react';
 
 const socialLinks = [
   {
@@ -30,6 +30,26 @@ const socialLinks = [
     name: 'Facebook',
     url: 'https://www.facebook.com/synctech.ie',
     icon: Facebook,
+  },
+  {
+    name: 'Fiverr',
+    url: 'https://www.fiverr.com/synctechie/',
+    icon: Briefcase,
+  },
+  {
+    name: 'Upwork',
+    url: 'https://www.upwork.com/freelancers/~01d3a189ece07667f4',
+    icon: Briefcase,
+  },
+  {
+    name: 'PeoplePerHour',
+    url: 'https://www.peopleperhour.com/freelancer/sync_tech-solutions-programmer-zymajmyx',
+    icon: Briefcase,
+  },
+  {
+    name: 'Freelancer.ie',
+    url: 'https://www.freelancer.ie/u/synctechie',
+    icon: Briefcase,
   },
 ];
 
