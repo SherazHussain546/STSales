@@ -29,7 +29,7 @@ export function BottomNavigation({ activeTab, setActiveTab }: BottomNavigationPr
             key={item.id}
             variant="ghost"
             className={cn(
-              'flex flex-col items-center h-auto px-2 py-2 text-xs font-normal gap-1 w-[calc(100%/6)]',
+              'flex flex-col items-center h-auto px-2 py-2 text-xs font-normal gap-1 w-[calc(100%/6)] hover:text-primary',
               activeTab === item.id ? 'text-primary' : 'text-muted-foreground'
             )}
             onClick={() => setActiveTab(item.id)}
