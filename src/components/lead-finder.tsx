@@ -13,7 +13,7 @@ import { leadSearch } from '@/ai/flows/lead-search';
 import type { Lead } from '@/ai/flows/lead-search';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/components/ui/use-toast';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
 
 
@@ -61,12 +61,14 @@ export function LeadFinder({ leads, setLeads, onSelectLead }: LeadFinderProps) {
       await addDoc(collection(db, 'savedLeads'), {
         ...lead,
         userId: user.uid,
+        createdAt: serverTimestamp(),
       });
       toast({
         title: 'Lead Saved!',
         description: `${lead.companyName} has been saved to your list.`,
       });
     } catch (error) {
+      console.error("Error saving lead: ", error);
       toast({
         variant: 'destructive',
         title: 'Error Saving Lead',

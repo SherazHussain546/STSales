@@ -1,31 +1,28 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Protect user-specific collections
-    match /clients/{clientId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    // Helper function to check ownership
+    function isOwner(userId) {
+      return request.auth.uid == userId;
     }
 
-    match /savedLeads/{leadId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    // CLIENTS: Users can only manage their own clients
+    match /clients/{clientId} {
+      allow read, delete: if isOwner(resource.data.userId);
+      allow create: if isOwner(request.resource.data.userId);
     }
     
-    match /blogPosts/{postId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    // SAVED LEADS: Users can manage their own saved leads
+    match /savedLeads/{leadId} {
+      allow read, delete: if isOwner(resource.data.userId);
+      allow create: if isOwner(request.resource.data.userId) && request.resource.data.createdAt == request.time;
     }
 
-    // Allow create operations if the new document's userId matches the user's uid
-    match /clients/{clientId} {
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-    }
-    match /savedLeads/{leadId} {
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-    }
+    // BLOG POSTS: Users can manage their own blog posts
     match /blogPosts/{postId} {
-        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+        allow read, delete: if isOwner(resource.data.userId);
+        allow create: if isOwner(request.resource.data.userId) && request.resource.data.createdAt == request.time;
     }
   }
 }
