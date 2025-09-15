@@ -4,7 +4,7 @@ import React, { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Briefcase, MapPin, Loader2, Wand2 } from 'lucide-react';
+import { Briefcase, MapPin, Loader2, Wand2, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -129,9 +129,15 @@ export function LeadFinder({ leads, setLeads, onSelectLead }: LeadFinderProps) {
                 <CardTitle className="font-headline">{lead.companyName}</CardTitle>
                 <CardDescription>{lead.summary}</CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm font-semibold mb-1">Tech Needs:</p>
-                <p className="text-sm text-muted-foreground">{lead.techNeeds}</p>
+              <CardContent className="space-y-4">
+                <div>
+                    <p className="text-sm font-semibold mb-2 flex items-center gap-2"><Zap className="text-destructive"/> Pain Points:</p>
+                    <p className="text-sm text-muted-foreground">{lead.painPoints}</p>
+                </div>
+                <div>
+                    <p className="text-sm font-semibold mb-2">Tech Needs:</p>
+                    <p className="text-sm text-muted-foreground">{lead.techNeeds}</p>
+                </div>
               </CardContent>
               <CardFooter>
                 <Button className="w-full" onClick={() => onSelectLead(lead)}>

@@ -13,8 +13,9 @@ import {z} from 'genkit';
 
 const LeadSchema = z.object({
   companyName: z.string().describe('The name of the company.'),
-  summary: z.string().describe('A brief summary of the company.'),
-  techNeeds: z.string().describe('The technology needs of the company.'),
+  summary: z.string().describe('A brief summary of the company, including its mission and recent activities.'),
+  painPoints: z.string().describe("Specific challenges or pain points the company is likely facing that SYNC TECH can solve."),
+  techNeeds: z.string().describe('The technology needs of the company, derived from their pain points.'),
 });
 
 export type Lead = z.infer<typeof LeadSchema>;
@@ -26,7 +27,7 @@ const LeadSearchInputSchema = z.object({
 export type LeadSearchInput = z.infer<typeof LeadSearchInputSchema>;
 
 const LeadSearchOutputSchema = z.object({
-  leads: z.array(LeadSchema).describe('An array of leads found.'),
+  leads: z.array(LeadSchema).describe('An array of well-researched leads.'),
 });
 export type LeadSearchOutput = z.infer<typeof LeadSearchOutputSchema>;
 
@@ -38,16 +39,19 @@ const prompt = ai.definePrompt({
   name: 'leadSearchPrompt',
   input: {schema: LeadSearchInputSchema},
   output: {schema: LeadSearchOutputSchema},
-  prompt: `You are a business development expert. Your goal is to find potential leads for SYNC TECH, a technology company.
+  prompt: `You are a team of expert business development analysts for SYNC TECH, a cutting-edge technology solutions provider.
 
-You will be given an industry and a location. You will search for companies in that industry and location that may need SYNC TECH's services.
+Your mission is to conduct deep-dive research to identify high-quality business leads. Go beyond a surface-level search.
+
+Your research for each company must uncover:
+1.  A concise summary of the company's mission and recent activities.
+2.  Specific, evidence-based pain points or challenges they are likely facing. (e.g., "outdated customer service portal," "struggling with data integration," "inefficient manual workflows").
+3.  How these pain points translate into specific technology needs that SYNC TECH can address.
 
 Industry: {{{industry}}}
 Location: {{{location}}}
 
-Return a JSON array of leads. Each lead should include the company name, a brief summary of the company, and the technology needs of the company.
-
-Make sure the techNeeds focuses on technologies that SYNC TECH can provide.`,
+Return a JSON array of leads. Each lead must contain the company name, a comprehensive summary, their specific pain points, and their resulting technology needs.`,
 });
 
 const leadSearchFlow = ai.defineFlow(

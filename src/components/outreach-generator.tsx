@@ -3,7 +3,7 @@
 import React, { useState, useTransition, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2, Copy, Inbox } from 'lucide-react';
+import { ArrowLeft, Loader2, Copy, Inbox, FileText, Mail } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useToast } from '@/components/ui/use-toast';
 import type { Lead } from '@/ai/flows/lead-search';
@@ -85,8 +85,11 @@ export function OutreachGenerator({ lead, onBack }: OutreachGeneratorProps) {
         <Accordion type="single" collapsible defaultValue="email" className="w-full space-y-4">
           <Card>
             <AccordionItem value="email" className="border-b-0">
-              <AccordionTrigger className="p-6 font-headline text-lg">Generated Cold Email</AccordionTrigger>
-              <AccordionContent className="px-6 space-y-4">
+              <AccordionTrigger className="p-6 font-headline text-lg flex items-center gap-2">
+                <Mail className="text-primary"/>
+                Generated Cold Email
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6 space-y-4">
                 <div className="space-y-1">
                     <p className="text-sm font-semibold text-muted-foreground">Subject</p>
                     <p className="font-semibold">{outreach.emailSubject}</p>
@@ -103,13 +106,16 @@ export function OutreachGenerator({ lead, onBack }: OutreachGeneratorProps) {
           
           <Card>
             <AccordionItem value="proposal" className="border-b-0">
-              <AccordionTrigger className="p-6 font-headline text-lg">Generated Proposal Outline</AccordionTrigger>
-              <AccordionContent className="px-6 space-y-4">
-                <div className="space-y-2 rounded-md border p-4 whitespace-pre-wrap font-code text-sm">
-                    {outreach.proposalOutline}
+                <AccordionTrigger className="p-6 font-headline text-lg flex items-center gap-2">
+                    <FileText className="text-primary"/>
+                    Generated Proposal
+                </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6 space-y-4">
+                <div className="prose prose-sm dark:prose-invert max-w-none space-y-2 rounded-md border p-4 whitespace-pre-wrap">
+                    <div dangerouslySetInnerHTML={{ __html: outreach.proposalOutline.replace(/\\n/g, '<br />') }} />
                 </div>
-                <Button variant="outline" onClick={() => handleCopy(outreach.proposalOutline, 'Proposal Outline')}>
-                  <Copy className="mr-2 h-4 w-4" /> Copy Proposal Outline
+                <Button variant="outline" onClick={() => handleCopy(outreach.proposalOutline, 'Proposal Document')}>
+                  <Copy className="mr-2 h-4 w-4" /> Copy Proposal
                 </Button>
               </AccordionContent>
             </AccordionItem>
