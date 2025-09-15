@@ -208,9 +208,6 @@ export function ClientManager() {
                             </div>
                         </div>
                     </CardContent>
-                    <CardFooter>
-                        <Button variant="outline" className="w-full">Generate Invoice for Due Amount</Button>
-                  </CardFooter>
                 </Card>
               ))}
             </div>
