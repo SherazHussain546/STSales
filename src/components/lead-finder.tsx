@@ -4,13 +4,18 @@ import React, { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Briefcase, MapPin, Loader2, Wand2, Zap } from 'lucide-react';
+import { Briefcase, MapPin, Loader2, Wand2, Zap, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { leadSearch } from '@/ai/flows/lead-search';
 import type { Lead } from '@/ai/flows/lead-search';
+import { useAuth } from '@/hooks/use-auth';
+import { useToast } from '@/components/ui/use-toast';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/client';
+
 
 const formSchema = z.object({
   industry: z.string().min(3, { message: 'Industry must be at least 3 characters.' }),
@@ -25,6 +30,8 @@ type LeadFinderProps = {
 
 export function LeadFinder({ leads, setLeads, onSelectLead }: LeadFinderProps) {
   const [isPending, startTransition] = useTransition();
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,6 +46,33 @@ export function LeadFinder({ leads, setLeads, onSelectLead }: LeadFinderProps) {
       const result = await leadSearch(values);
       setLeads(result.leads);
     });
+  };
+
+  const handleSaveLead = async (lead: Lead) => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Not Authenticated',
+        description: 'You must be logged in to save a lead.',
+      });
+      return;
+    }
+    try {
+      await addDoc(collection(db, 'savedLeads'), {
+        ...lead,
+        userId: user.uid,
+      });
+      toast({
+        title: 'Lead Saved!',
+        description: `${lead.companyName} has been saved to your list.`,
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error Saving Lead',
+        description: 'An unexpected error occurred.',
+      });
+    }
   };
 
   return (
@@ -139,9 +173,12 @@ export function LeadFinder({ leads, setLeads, onSelectLead }: LeadFinderProps) {
                     <p className="text-sm text-muted-foreground">{lead.techNeeds}</p>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex items-center gap-2">
                 <Button className="w-full" onClick={() => onSelectLead(lead)}>
                   Generate Outreach
+                </Button>
+                 <Button variant="outline" size="icon" onClick={() => handleSaveLead(lead)}>
+                  <Heart className="h-4 w-4" />
                 </Button>
               </CardFooter>
             </Card>

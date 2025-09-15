@@ -12,6 +12,9 @@ import { useToast } from '@/components/ui/use-toast';
 import { generateBlogPost } from '@/ai/flows/blog-generator';
 import type { BlogGeneratorOutput } from '@/ai/flows/blog-generator';
 import { Loader2, Feather, Copy } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase/client';
 
 const formSchema = z.object({
   topic: z.string().min(5, { message: 'Topic must be at least 5 characters.' }),
@@ -21,6 +24,7 @@ export function BlogGenerator() {
   const [isPending, startTransition] = useTransition();
   const [blogPost, setBlogPost] = useState<BlogGeneratorOutput | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -30,11 +34,28 @@ export function BlogGenerator() {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Not Authenticated',
+        description: 'You must be logged in to generate a blog post.',
+      });
+      return;
+    }
     setBlogPost(null);
     startTransition(async () => {
       try {
         const result = await generateBlogPost(values);
         setBlogPost(result);
+        
+        // Save to Firestore for analytics
+        await addDoc(collection(db, 'blogPosts'), {
+          userId: user.uid,
+          topic: values.topic,
+          title: result.title,
+          createdAt: serverTimestamp(),
+        });
+
       } catch (error) {
         toast({
           variant: 'destructive',

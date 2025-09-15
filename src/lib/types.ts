@@ -1,4 +1,4 @@
-export type Tab = 'leads' | 'outreach' | 'invoice' | 'clients' | 'socials' | 'blog';
+export type Tab = 'leads' | 'outreach' | 'invoice' | 'clients' | 'socials' | 'blog' | 'analytics' | 'saved';
 
 export type LineItem = {
   id: string;
@@ -16,4 +16,13 @@ export type Client = {
     services: string;
     totalBilled: number;
     totalPaid: number;
+};
+
+export type SavedLead = {
+  id: string;
+  userId: string;
+  companyName: string;
+  summary: string;
+  painPoints: string;
+  techNeeds: string;
 };
