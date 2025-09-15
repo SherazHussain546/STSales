@@ -2,27 +2,24 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check ownership
-    function isOwner(userId) {
-      return request.auth.uid == userId;
+
+    // Helper function to check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
-    // CLIENTS: Users can only manage their own clients
-    match /clients/{clientId} {
-      allow read, delete: if isOwner(resource.data.userId);
-      allow create: if isOwner(request.resource.data.userId);
-    }
-    
-    // SAVED LEADS: Users can manage their own saved leads
-    match /savedLeads/{leadId} {
-      allow read, delete: if isOwner(resource.data.userId);
-      allow create: if isOwner(request.resource.data.userId) && request.resource.data.createdAt == request.time;
+    // Helper function to check if the resource belongs to the user
+    function isOwner(resource) {
+      return resource.data.userId == request.auth.uid;
     }
 
-    // BLOG POSTS: Users can manage their own blog posts
-    match /blogPosts/{postId} {
-        allow read, delete: if isOwner(resource.data.userId);
-        allow create: if isOwner(request.resource.data.userId) && request.resource.data.createdAt == request.time;
+    // Generic rule for collections where documents are owned by users
+    match /{collection}/{docId} {
+      // Allow read and delete if the user is authenticated and is the owner of the document.
+      allow read, delete: if isAuthenticated() && isOwner(get(path(collection, docId)));
+
+      // Allow create if the user is authenticated and is setting themselves as the owner.
+      allow create: if isAuthenticated() && isOwner(request.resource);
     }
   }
 }
