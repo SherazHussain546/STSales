@@ -13,7 +13,7 @@ import { SocialsViewer } from '@/components/socials-viewer';
 import { BlogGenerator } from '@/components/blog-generator';
 import type { Tab } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
-import { Sidebar, SidebarContent, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from '@/components/ui/sidebar';
 import { Logo } from '@/components/logo';
 import { Search, Mail, FileText, Users, Share2, Feather, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -92,45 +92,50 @@ export default function Home() {
 
   return (
     <SidebarProvider>
-      <Sidebar>
-        <div className="flex flex-col h-full p-2">
-            <div className="p-4 mb-4 flex justify-center">
-                <Logo />
-            </div>
-            <SidebarContent>
-                <SidebarMenu>
-                {navItems.map((item) => (
-                    <SidebarMenuItem key={item.id}>
-                        <SidebarMenuButton
-                            isActive={activeTab === item.id}
-                            onClick={() => setActiveTab(item.id)}
-                            tooltip={{
-                                children: item.label,
-                                side: "right",
-                                align: "center",
-                            }}
-                        >
-                            <item.icon />
-                            <span>{item.label}</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                ))}
-                </SidebarMenu>
-            </SidebarContent>
-            <div className="mt-auto">
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton onClick={handleLogout}>
-                            <LogOut />
-                            <span>Logout</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-            </div>
+      <Sidebar collapsible="icon" className="border-r">
+        <SidebarHeader className="p-4">
+            <Logo />
+        </SidebarHeader>
+        <SidebarContent>
+            <SidebarMenu>
+            {navItems.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton
+                        isActive={activeTab === item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        tooltip={{
+                            children: item.label,
+                            side: "right",
+                            align: "center",
+                        }}
+                    >
+                        <item.icon />
+                        <span>{item.label}</span>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            ))}
+            </SidebarMenu>
+        </SidebarContent>
+        <div className="mt-auto p-2">
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton 
+                        onClick={handleLogout}
+                        tooltip={{
+                            children: "Logout",
+                            side: "right",
+                            align: "center",
+                        }}
+                    >
+                        <LogOut />
+                        <span>Logout</span>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
         </div>
       </Sidebar>
       <SidebarInset>
-        {isMobile && <Header />}
+        <Header />
         <main className="flex-grow pb-20 md:pb-4 pt-4 px-4">
             <div className="max-w-4xl mx-auto">
              {renderContent()}
