@@ -2,6 +2,10 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/components/auth-provider';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { Logo } from '@/components/logo';
+import { BottomNavigation } from '@/components/bottom-navigation';
+import { Header } from '@/components/header';
 
 export const metadata: Metadata = {
   title: 'SYNC Sales Hub',
@@ -24,10 +28,8 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-background text-foreground">
         <AuthProvider>
-          <div className="relative flex min-h-screen w-full flex-col items-center">
-              <div className="w-full max-w-md">
-                  {children}
-              </div>
+          <div className="relative flex min-h-screen w-full flex-col">
+            {children}
           </div>
           <Toaster />
         </AuthProvider>

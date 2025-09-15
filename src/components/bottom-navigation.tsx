@@ -22,15 +22,15 @@ const navItems = [
 
 export function BottomNavigation({ activeTab, setActiveTab }: BottomNavigationProps) {
   return (
-    <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-card border-t border-border">
-      <div className="flex justify-around items-center p-2">
+    <footer className="fixed bottom-0 left-0 w-full bg-card border-t border-border z-50 md:hidden">
+      <div className="flex justify-around items-center p-2 max-w-md mx-auto">
         {navItems.map((item) => (
           <Button
             key={item.id}
             variant="ghost"
             className={cn(
-              'flex flex-col items-center h-auto px-2 py-2 text-xs font-normal gap-1 w-[calc(100%/6)] rounded-md hover:bg-primary hover:text-white',
-              activeTab === item.id ? 'bg-primary/90 text-white' : 'text-muted-foreground'
+              'flex flex-col items-center h-auto px-2 py-2 text-xs font-normal gap-1 w-[calc(100%/6)] rounded-md hover:bg-primary hover:text-primary-foreground',
+              activeTab === item.id ? 'bg-primary/90 text-primary-foreground' : 'text-muted-foreground'
             )}
             onClick={() => setActiveTab(item.id)}
             aria-current={activeTab === item.id ? 'page' : undefined}
