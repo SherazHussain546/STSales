@@ -25,6 +25,15 @@ export type SavedLead = {
   summary: string;
   painPoints: string;
   techNeeds: string;
+  contactName?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  notes?: string;
+  createdAt: {
+    seconds: number;
+    nanoseconds: number;
+  };
 };
 
 export type ContactSubmission = {
