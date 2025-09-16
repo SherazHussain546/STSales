@@ -1,4 +1,4 @@
-export type Tab = 'leads' | 'outreach' | 'invoice' | 'clients' | 'socials' | 'blog' | 'analytics' | 'saved';
+export type Tab = 'leads' | 'outreach' | 'invoice' | 'clients' | 'socials' | 'blog' | 'analytics' | 'saved' | 'contact';
 
 export type LineItem = {
   id: string;
@@ -25,4 +25,16 @@ export type SavedLead = {
   summary: string;
   painPoints: string;
   techNeeds: string;
+};
+
+export type ContactSubmission = {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  createdAt: {
+    seconds: number;
+    nanoseconds: number;
+  };
+  status: 'new' | 'read';
 };

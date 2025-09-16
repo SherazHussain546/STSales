@@ -13,11 +13,12 @@ import { SocialsViewer } from '@/components/socials-viewer';
 import { BlogGenerator } from '@/components/blog-generator';
 import { AnalyticsDashboard } from '@/components/analytics-dashboard';
 import { SavedLeads } from '@/components/saved-leads';
+import { ContactSubmissions } from '@/components/contact-submissions';
 import type { Tab } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from '@/components/ui/sidebar';
 import { Logo } from '@/components/logo';
-import { Search, Mail, FileText, Users, Share2, Feather, LogOut, AreaChart, Bookmark } from 'lucide-react';
+import { Search, Mail, FileText, Users, Share2, Feather, LogOut, AreaChart, Bookmark, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
@@ -28,6 +29,7 @@ const navItems = [
   { id: 'leads', label: 'Lead Finder', icon: Search },
   { id: 'saved', label: 'Saved', icon: Bookmark },
   { id: 'outreach', label: 'Outreach', icon: Mail },
+  { id: 'contact', label: 'Contact', icon: MessageSquare },
   { id: 'invoice', label: 'Invoice', icon: FileText },
   { id: 'clients', label: 'Clients', icon: Users },
   { id: 'blog', label: 'Blog', icon: Feather },
@@ -93,6 +95,8 @@ export default function Home() {
         return <AnalyticsDashboard />;
       case 'saved':
         return <SavedLeads onSelectLead={handleSelectLead} />;
+      case 'contact':
+        return <ContactSubmissions />;
       default:
         return <LeadFinder leads={leads} setLeads={setLeads} onSelectLead={handleSelectLead} />;
     }

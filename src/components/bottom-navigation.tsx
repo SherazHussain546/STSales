@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Mail, FileText, Users, Share2, Feather, AreaChart, Bookmark } from 'lucide-react';
+import { Search, Mail, FileText, Users, Share2, Feather, AreaChart, Bookmark, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Tab } from '@/lib/types';
@@ -15,8 +15,8 @@ const navItems = [
   { id: 'leads', label: 'Leads', icon: Search },
   { id: 'saved', label: 'Saved', icon: Bookmark },
   { id: 'outreach', label: 'Outreach', icon: Mail },
+  { id: 'contact', label: 'Contact', icon: MessageSquare },
   { id: 'clients', label: 'Clients', icon: Users },
-  { id: 'blog', label: 'Blog', icon: Feather },
   { id: 'analytics', label: 'Analytics', icon: AreaChart },
 ] as const;
 
