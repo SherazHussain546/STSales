@@ -4,7 +4,7 @@ import React, { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Briefcase, MapPin, Loader2, Wand2, Zap, Heart, Globe, Mail, Phone, Users } from 'lucide-react';
+import { Briefcase, MapPin, Loader2, Wand2, Zap, Heart, Globe, Mail, Phone, Users, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/components/ui/use-toast';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
+import { Badge } from '@/components/ui/badge';
 
 
 const formSchema = z.object({
@@ -36,8 +37,8 @@ export function LeadFinder({ leads, setLeads, onSelectLead }: LeadFinderProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      industry: 'SaaS',
-      location: 'San Francisco, CA',
+      industry: 'Restaurants',
+      location: 'Dublin, Ireland',
     },
   });
 
@@ -162,24 +163,36 @@ export function LeadFinder({ leads, setLeads, onSelectLead }: LeadFinderProps) {
           {leads.map((lead, index) => (
             <Card key={index}>
               <CardHeader>
-                <CardTitle className="font-headline">{lead.companyName}</CardTitle>
-                <CardDescription>{lead.summary}</CardDescription>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle className="font-headline">{lead.companyName}</CardTitle>
+                        {lead.address && <CardDescription>{lead.address}</CardDescription>}
+                    </div>
+                    {lead.rating && (
+                        <Badge variant="outline" className="flex items-center gap-1">
+                            <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                            <span>{lead.rating.toFixed(1)}</span>
+                        </Badge>
+                    )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     {lead.contactName && <div className="flex items-center gap-2"><Users className="h-4 w-4 text-muted-foreground" /> <span>{lead.contactName}</span></div>}
-                    {lead.email && <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> <span>{lead.email}</span></div>}
+                    {lead.email && <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> <a href={`mailto:${lead.email}`} className="text-primary hover:underline">{lead.email}</a></div>}
                     {lead.phone && <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> <span>{lead.phone}</span></div>}
                     {lead.website && <div className="flex items-center gap-2"><Globe className="h-4 w-4 text-muted-foreground" /> <a href={lead.website} target="_blank" rel="noreferrer" className="text-primary hover:underline">{lead.website}</a></div>}
                 </div>
-                <div>
+                 <div>
                     <p className="text-sm font-semibold mb-2 flex items-center gap-2"><Zap className="text-destructive"/> Pain Points:</p>
                     <p className="text-sm text-muted-foreground">{lead.painPoints}</p>
                 </div>
-                <div>
-                    <p className="text-sm font-semibold mb-2">Tech Needs:</p>
-                    <p className="text-sm text-muted-foreground">{lead.techNeeds}</p>
-                </div>
+                {lead.reviews && (
+                  <div>
+                      <p className="text-sm font-semibold mb-2">Review Summary:</p>
+                      <p className="text-sm text-muted-foreground">{lead.reviews}</p>
+                  </div>
+                )}
                 {lead.notes && (
                   <div>
                       <p className="text-sm font-semibold mb-2">Analyst Notes:</p>

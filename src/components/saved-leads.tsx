@@ -9,7 +9,8 @@ import type { Lead } from '@/ai/flows/lead-search';
 import type { SavedLead } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, HeartCrack, Bookmark, Zap, Users, Mail, Phone, Globe } from 'lucide-react';
+import { Loader2, HeartCrack, Bookmark, Zap, Users, Mail, Phone, Globe, Star } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface SavedLeadsProps {
   onSelectLead: (lead: Lead) => void;
@@ -88,13 +89,23 @@ export function SavedLeads({ onSelectLead }: SavedLeadsProps) {
           {savedLeads.map(lead => (
             <Card key={lead.id}>
               <CardHeader>
-                <CardTitle className="font-headline">{lead.companyName}</CardTitle>
-                <CardDescription>{lead.summary}</CardDescription>
+                 <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle className="font-headline">{lead.companyName}</CardTitle>
+                        {lead.address && <CardDescription>{lead.address}</CardDescription>}
+                    </div>
+                    {lead.rating && (
+                        <Badge variant="outline" className="flex items-center gap-1">
+                            <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                            <span>{lead.rating.toFixed(1)}</span>
+                        </Badge>
+                    )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     {lead.contactName && <div className="flex items-center gap-2"><Users className="h-4 w-4 text-muted-foreground" /> <span>{lead.contactName}</span></div>}
-                    {lead.email && <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> <span>{lead.email}</span></div>}
+                    {lead.email && <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> <a href={`mailto:${lead.email}`} className="text-primary hover:underline">{lead.email}</a></div>}
                     {lead.phone && <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> <span>{lead.phone}</span></div>}
                     {lead.website && <div className="flex items-center gap-2"><Globe className="h-4 w-4 text-muted-foreground" /> <a href={lead.website} target="_blank" rel="noreferrer" className="text-primary hover:underline">{lead.website}</a></div>}
                 </div>
@@ -102,10 +113,12 @@ export function SavedLeads({ onSelectLead }: SavedLeadsProps) {
                     <p className="text-sm font-semibold mb-2 flex items-center gap-2"><Zap className="text-destructive"/> Pain Points:</p>
                     <p className="text-sm text-muted-foreground">{lead.painPoints}</p>
                 </div>
-                <div>
-                    <p className="text-sm font-semibold mb-2">Tech Needs:</p>
-                    <p className="text-sm text-muted-foreground">{lead.techNeeds}</p>
-                </div>
+                 {lead.reviews && (
+                  <div>
+                      <p className="text-sm font-semibold mb-2">Review Summary:</p>
+                      <p className="text-sm text-muted-foreground">{lead.reviews}</p>
+                  </div>
+                )}
                 {lead.notes && (
                   <div>
                       <p className="text-sm font-semibold mb-2">Analyst Notes:</p>

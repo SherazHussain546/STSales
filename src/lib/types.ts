@@ -29,6 +29,9 @@ export type SavedLead = {
   email?: string;
   phone?: string;
   website?: string;
+  address?: string;
+  rating?: number;
+  reviews?: string;
   notes?: string;
   createdAt: {
     seconds: number;
