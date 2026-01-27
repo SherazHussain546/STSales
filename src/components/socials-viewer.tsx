@@ -3,7 +3,8 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Github, Linkedin, Facebook, Instagram, Share2, Rss, Briefcase } from 'lucide-react';
+import { Github, Linkedin, Facebook, Instagram, Share2, Rss, Briefcase, Link as LinkIcon, ExternalLink } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 const socialLinks = [
   {
@@ -54,6 +55,16 @@ const socialLinks = [
 ];
 
 export function SocialsViewer() {
+    const { toast } = useToast();
+
+    const handleCopy = (url: string) => {
+        navigator.clipboard.writeText(url);
+        toast({
+        title: 'Link Copied!',
+        description: 'The link has been copied to your clipboard.',
+        });
+    };
+
   return (
     <Card>
       <CardHeader>
@@ -63,20 +74,30 @@ export function SocialsViewer() {
         </CardTitle>
         <CardDescription>Connect with us on our social media platforms.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-2">
         {socialLinks.map((link) => (
-          <a
-            key={link.name}
-            href={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full"
-          >
-            <Button variant="outline" className="w-full justify-start">
-              <link.icon className="mr-4" />
-              <span>{link.name}</span>
-            </Button>
-          </a>
+          <div key={link.name} className="flex items-center justify-between rounded-lg border p-3">
+             <div className="flex items-center gap-3">
+                <link.icon className="h-5 w-5 text-muted-foreground" />
+                <span className="font-medium">{link.name}</span>
+             </div>
+             <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" onClick={() => handleCopy(link.url)}>
+                    <LinkIcon className="h-4 w-4" />
+                    <span className="sr-only">Copy Link</span>
+                </Button>
+                <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <Button variant="outline" size="sm">
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Visit
+                    </Button>
+                </a>
+             </div>
+          </div>
         ))}
       </CardContent>
     </Card>
